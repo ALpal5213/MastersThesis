@@ -5,74 +5,10 @@
 - [Device Description](#device-description)
 
 ## Introduction
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
+Describe the goal of thesis project and what this repo does (holds code for thesis)
 
 ## Device Description
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
-blah
+desciption of the Xilinx device and links to it
+- should describe the antenna arrays
+- ports used
+- version information
