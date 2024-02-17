@@ -1,9 +1,8 @@
 # Masters Thesis
 
 #### Table of Contents
-[Introduction](##Introduction)
-[Device Description](##Device Description)
-...snip...
+- [Introduction](#introduction)
+- [Device Description](#device-description)
 
 ## Introduction
 blah
