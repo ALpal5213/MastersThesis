@@ -12,3 +12,6 @@ desciption of the Xilinx device and links to it
 - should describe the antenna arrays
 - ports used
 - version information
+
+
+https://wiki.analog.com/resources/eval/user-guides/ad-fmcomms5-ebz
