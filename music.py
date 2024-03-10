@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import signal_simulation
 
-numSignals = 2 # expected signals 
+numSignals = len(signal_simulation.tx_doa) # expected signals 
 numElements = signal_simulation.N
 d = signal_simulation.d
 rx = signal_simulation.rx
 
+print(numSignals)
 # print(rx.shape)
 # print(len(rx[0]))
 
