@@ -2,10 +2,12 @@ import adi
 import matplotlib.pyplot as plt
 import numpy as np
 
-import iio; 
-print(iio.version) # Should be v0.25
-
 # Create device from specific uri address
-sdr = adi.ad9361(uri="ip:analog.local")
-# Get data from transceiver
-data = sdr.rx()
+# 169.254.114.13
+# sdr = adi.ad9361(uri="ip:169.254.114.13")
+sdr = adi.FMComms5(uri="ip:analog")
+# # Get data from transceiver
+# data = sdr.rx()
+
+sdr.rx_lo = 2169000000
+sdr.rx_lo_chip_b = 2420000000
