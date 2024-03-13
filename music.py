@@ -1,7 +1,9 @@
 # import libraries
 import matplotlib.pyplot as plt
 import numpy as np
+import imp
 import signal_simulation
+imp.reload(signal_simulation)
 
 numSignals = len(signal_simulation.tx_doa) # expected signals 
 numElements = signal_simulation.N
@@ -9,14 +11,24 @@ d = signal_simulation.d
 rx = signal_simulation.rx
 
 print(numSignals)
-# print(rx.shape)
-# print(len(rx[0]))
+print(rx.shape)
+
+# for i in range(numElements):
+#     plt.plot(rx[i][:200]) # lets plot angle in degrees
+# plt.xlabel("Time")
+# plt.ylabel("Amplitude")
+# plt.grid()
+# plt.show()
 
 R = rx @ rx.conj().T
+eigenValues, eigenVectors = np.linalg.eig(R)
 
 print(R.shape)
+print(eigenValues.shape)
+print(np.abs(eigenValues))
 
-eigenValues, eigenVectors = np.linalg.eig(R)
+plt.plot(10 * np.log10(np.abs(eigenValues)),'.-')
+plt.show()
 
 indexesOfSortedEigenValues = np.argsort(np.abs(eigenValues))
 
@@ -44,11 +56,18 @@ for theta_i in theta_scan:
 
 results /= np.max(results)
 
-plt.plot(theta_scan * 180 / np.pi, results) # lets plot angle in degrees
-plt.xlabel("Theta [Degrees]")
-plt.ylabel("DOA Metric")
-plt.grid()
+fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+ax.plot(theta_scan, results) # MAKE SURE TO USE RADIAN FOR POLAR
+ax.set_theta_zero_location('N') # make 0 degrees point up
+ax.set_theta_direction(-1) # increase clockwise
+ax.set_rlabel_position(55)  # Move grid labels away from other labels
 plt.show()
+
+# plt.plot(theta_scan * 180 / np.pi, results) # lets plot angle in degrees
+# plt.xlabel("Theta [Degrees]")
+# plt.ylabel("DOA Metric")
+# plt.grid()
+# plt.show()
 
 # sigEVecs = sortedEVecs[:, :numSignals]
 # noiseEVecs = sortedEVecs[:, numSignals:numElements]

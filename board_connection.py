@@ -9,5 +9,5 @@ sdr = adi.FMComms5(uri="ip:analog")
 # # Get data from transceiver
 # data = sdr.rx()
 
-sdr.rx_lo = 2169000000
-sdr.rx_lo_chip_b = 2420000000
+sdr.rx_lo = 2000000000
+sdr.rx_lo_chip_b = 2411000000
