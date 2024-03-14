@@ -2,19 +2,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # create a transmitted signal
-tx_doa = np.array([20]) # in degrees
+tx_doa = np.array([20, -20, 50, 40]) # in degrees
 theta = tx_doa * np.pi / 180 # in radians
 
 sample_rate = 1e6
 samples = 10000
-
 t = np.arange(samples) / sample_rate
-f_tone = 0.02e6
-tx_base = np.exp(2j * np.pi * f_tone * t).reshape(-1, 1)
-tx = np.repeat(tx_base, len(tx_doa), axis=1).T
+t = t.reshape(1,-1) # turn into row vector
 
-# print(tx.shape)
-# print(np.average(tx) - np.average(tx_base))
+f_base = 2e9
+f_tone = np.array([])
+
+for i in range(len(tx_doa)):
+    arr = np.array([f_base + i * 1])
+    f_tone = np.append(f_tone, arr)
+
+f_tone = f_tone.reshape(-1, 1) # turn into column vector
+
+tx = np.exp(2j * np.pi * f_tone @ t)
+
+print(t.reshape(-1,1).T.shape)
+print(f_tone.shape)
+print((f_tone @ t.reshape(-1, 1).T).shape)
+print(tx.shape)
 
 plt.plot(tx[0][:200]) # lets plot angle in degrees
 plt.xlabel("Time")
@@ -24,7 +34,7 @@ plt.show()
 
 # create antenna array
 d = 0.5 # array spacing in terms of wavelength
-N = 3 # number of elements for ULA
+N = 10 # number of elements for ULA
 
 # Steering vector matrix
 k = np.arange(N).reshape(-1, 1)
@@ -47,8 +57,6 @@ print(rx.shape)
 
 for i in range(N):
     plt.plot(rx[i][:200])
-    # plt.plot(np.asarray(rx[i,:]).squeeze().imag[0:200]) 
-    # plt.plot(np.asarray(rx[i,:]).squeeze().real[0:200]) 
 plt.xlabel("Time")
 plt.ylabel("Amplitude")
 plt.grid()
