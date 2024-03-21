@@ -1,48 +1,39 @@
-# import libraries
-import matplotlib.pyplot as plt
 import numpy as np
-import imp
-import signal_simulation
-imp.reload(signal_simulation)
+from scipy.signal import find_peaks
 
-numSignals = len(signal_simulation.tx_doa) # expected signals 
-numElements = signal_simulation.N
-d = signal_simulation.d
-rx = signal_simulation.rx
+# import matplotlib.pyplot as plt
+# import importlib
+# import signal_simulation
+# importlib.reload(signal_simulation)
 
-R = rx @ rx.conj().T
-eigenValues, eigenVectors = np.linalg.eig(R)
+# Perform MUSIC algorithm and output an array of angles
+def scan_music(thetaScan, numSignals, precision, R, numElements, d):
+    eigenValues, eigenVectors = np.linalg.eig(R)
 
-indexesOfSortedEigenValues = np.argsort(np.abs(eigenValues))
-sortedEigenVectors = eigenVectors[:, indexesOfSortedEigenValues]
+    indexesOfSortedEigenValues = np.argsort(np.abs(eigenValues))
+    sortedEigenVectors = eigenVectors[:, indexesOfSortedEigenValues]
 
-noiseMatrix = np.zeros((numElements, numElements - numSignals), dtype=np.complex64)
+    noiseMatrix = np.zeros((numElements, numElements - numSignals), dtype=np.complex64)
 
-for i in range(numElements - numSignals):
-   noiseMatrix[:, i] = sortedEigenVectors[:, i]
+    for i in range(numElements - numSignals):
+        noiseMatrix[:, i] = sortedEigenVectors[:, i]
 
-theta_scan = np.linspace(-1*np.pi, np.pi, 1000) # -180 to +180 degrees
-results = []
+    results = []
 
-for theta_i in theta_scan:
-    a = np.exp(-2j * np.pi * d * np.arange(numElements) * np.sin(theta_i)) # array factor
-    a = a.reshape(-1,1)
-    metric = 1 / (a.conj().T @ noiseMatrix @ noiseMatrix.conj().T @ a) # The main MUSIC equation
-    metric = np.abs(metric.squeeze()) # take magnitude
-    metric = 10*np.log10(metric) # convert to dB
-    results.append(metric)
+    for theta_i in thetaScan:
+        a = np.exp(-2j * np.pi * d * np.arange(numElements) * np.sin(theta_i)) # array factor
+        a = a.reshape(-1,1)
+        metric = 1 / (a.conj().T @ noiseMatrix @ noiseMatrix.conj().T @ a) # The main MUSIC equation
+        metric = np.abs(metric.squeeze()) # take magnitude
+        metric = 10 * np.log10(metric) # convert to dB
+        results.append(metric)
 
-results /= np.max(results)
+    results /= np.max(results)
 
-sortedEigenValues = np.flip(eigenValues[indexesOfSortedEigenValues])
-plt.plot(10 * np.log10(np.abs(sortedEigenValues)),'.-')
-plt.show()
+    return results
 
-print(eigenValues.shape)
+def doa_music(results, thetaScan):
+    peaks, _ = find_peaks(results, height=0)
+    doas = thetaScan[peaks] * 180 / np.pi
 
-fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-ax.plot(theta_scan, results) # MAKE SURE TO USE RADIAN FOR POLAR
-ax.set_theta_zero_location('N') # make 0 degrees point up
-ax.set_theta_direction(-1) # increase clockwise
-ax.set_rlabel_position(55)  # Move grid labels away from other labels
-plt.show()
+    return doas, peaks

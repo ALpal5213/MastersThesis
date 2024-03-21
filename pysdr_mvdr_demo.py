@@ -26,40 +26,29 @@ r = a @ tx.T  # dont get too caught up by the transpose, the important thing is 
 print(r.shape) # 3x10000.  r is now going to be a 2D array, 1D is time and 1D is the spatial dimension
 
 n = np.random.randn(Nr, N) + 1j*np.random.randn(Nr, N)
-r = r + 0.05*n # r and n are both 3x10000
+r = r + 0.5*n # r and n are both 3x10000
 
 plt.plot(np.asarray(r[0,:]).squeeze().real[0:200]) # the asarray and squeeze are just annoyances we have to do because we came from a matrix
 plt.plot(np.asarray(r[1,:]).squeeze().real[0:200])
 plt.plot(np.asarray(r[2,:]).squeeze().real[0:200])
 plt.show()
 
-num_expected_signals = 1 # Try changing this!
+def w_mvdr(theta, r):
+   a = np.exp(-2j * np.pi * d * np.arange(Nr) * np.sin(theta)) # steering vector in the desired direction theta
+   a = a.reshape(-1,1) # make into a column vector (size 3x1)
+   R = r @ r.conj().T # Calc covariance matrix. gives a Nr x Nr covariance matrix of the samples
+   Rinv = np.linalg.pinv(R) # 3x3. pseudo-inverse tends to work better/faster than a true inverse
+   w = (Rinv @ a)/(a.conj().T @ Rinv @ a) # MVDR/Capon equation! numerator is 3x3 * 3x1, denominator is 1x3 * 3x3 * 3x1, resulting in a 3x1 weights vector
+   return w
 
-# part that doesn't change with theta_i
-R = r @ r.conj().T # Calc covariance matrix, it's Nr x Nr
-w, v = np.linalg.eig(R) # eigenvalue decomposition, v[:,i] is the eigenvector corresponding to the eigenvalue w[i]
-eig_val_order = np.argsort(np.abs(w.squeeze())) # find order of magnitude of eigenvalues
-v = v[:, eig_val_order] # sort eigenvectors using this order
-# We make a new eigenvector matrix representing the "noise subspace", it's just the rest of the eigenvalues
-V = np.zeros((Nr, Nr - num_expected_signals), dtype=np.complex64)
-for i in range(Nr - num_expected_signals):
-   V[:, i] = v[:, i]
-
-theta_scan = np.linspace(-1*np.pi, np.pi, 1000) # -180 to +180 degrees
+theta_scan = np.linspace(-1*np.pi, np.pi, 1000) # 1000 different thetas between -180 and +180 degrees
 results = []
-
 for theta_i in theta_scan:
-    a = np.exp(-2j * np.pi * d * np.arange(Nr) * np.sin(theta_i)) # array factor
-    a = a.reshape(-1,1)
-    metric = 1 / (a.conj().T @ V @ V.conj().T @ a) # The main MUSIC equation
-    metric = np.abs(metric.squeeze()) # take magnitude
-    metric = 10*np.log10(metric) # convert to dB
-    results.append(metric)
-
-results /= np.max(results) # normalize
-
-plt.plot(10 * np.log10(np.abs(w)),'.-')
-plt.show()
+   w = w_mvdr(theta_i, r) # 3x1
+   r_weighted = w.conj().T @ r # apply weights
+   power_dB = 10*np.log10(np.var(r_weighted)) # power in signal, in dB so its easier to see small and large lobes at the same time
+   results.append(power_dB)
+results -= np.max(results) # normalize
 
 fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
 ax.plot(theta_scan, results) # MAKE SURE TO USE RADIAN FOR POLAR
