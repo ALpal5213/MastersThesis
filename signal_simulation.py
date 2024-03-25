@@ -1,8 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# create a transmitted signal
-tx_doa = np.array([20, 45]) # in degrees
+# create directions of arrival
+tx_doa = np.array([45, 0]) # in degrees
+
+# create antenna array properties
+d = 0.5 # array spacing in terms of wavelength
+numElements = 10
+
+
 theta = tx_doa * np.pi / 180 # in radians
 
 sample_rate = 1e6
@@ -21,9 +27,12 @@ f_tone = f_tone.reshape(-1, 1) # turn into column vector
 
 tx = np.exp(2j * np.pi * f_tone * t)
 
-# create antenna array
-d = 0.5 # array spacing in terms of wavelength
-numElements = 10
+# tx = np.array([np.exp(2j * np.pi * f_base * t), np.exp(2j * np.pi * f_base * t2)]).squeeze()
+
+# print(tx.shape)
+# print(tx2.shape)
+
+
 
 # Steering vector matrix
 k = np.arange(numElements).reshape(-1, 1)
@@ -31,15 +40,13 @@ sin_theta = np.sin(theta)
 
 A = np.exp(-2j * np.pi * d * k * sin_theta)
 
-# print(A.shape)
-
 # Get received signal
 rx = (A @ tx) 
 # print(rx.shape)
 
-noise = np.random.randn(numElements, samples) + 1j * np.random.randn(numElements, samples)
-sigma = 0.5 # noise standard deviation (depends on antenna)
-rx = rx + sigma * noise
+sigma = 0.5
+noise = sigma * (np.random.randn(numElements, samples) + 1j * np.random.randn(numElements, samples))
+rx = rx + noise
 # print(rx.shape)
 
 for i in range(numElements):
