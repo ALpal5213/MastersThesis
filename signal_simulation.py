@@ -7,16 +7,16 @@ tx_doa = np.array([45, 0]) # in degrees
 # create antenna array properties
 d = 0.5 # array spacing in terms of wavelength
 numElements = 10
-
+sigma = 0.5
 
 theta = tx_doa * np.pi / 180 # in radians
 
 sample_rate = 1e6
-samples = 10000
+samples = 1024
 t = np.arange(samples) / sample_rate
 t = t.reshape(1,-1) # turn into row vector
 
-f_base = 0.02e6
+f_base = 0.03e6
 f_tone = np.array([])
 
 for i in range(len(tx_doa)):
@@ -26,7 +26,7 @@ for i in range(len(tx_doa)):
 f_tone = f_tone.reshape(-1, 1) # turn into column vector
 
 tx = np.exp(2j * np.pi * f_tone * t)
-
+# print(np.var(tx[:, 0]))
 # tx = np.array([np.exp(2j * np.pi * f_base * t), np.exp(2j * np.pi * f_base * t2)]).squeeze()
 
 # print(tx.shape)
@@ -44,8 +44,10 @@ A = np.exp(-2j * np.pi * d * k * sin_theta)
 rx = (A @ tx) 
 # print(rx.shape)
 
-sigma = 0.5
-noise = sigma * (np.random.randn(numElements, samples) + 1j * np.random.randn(numElements, samples))
+
+noise = sigma * (np.random.randn(numElements, samples) + 1j * np.random.randn(numElements, samples)) / np.sqrt(2)
+print(np.var(noise))
+
 rx = rx + noise
 # print(rx.shape)
 

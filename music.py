@@ -1,8 +1,9 @@
 import numpy as np
-from scipy.signal import find_peaks
+from scipy import signal
+import matplotlib.pyplot as plt
 
 # Perform MUSIC algorithm and output an array of angles
-def scan(thetaScan, numSignals, R, numElements, d):
+def scan(thetaScan, R, numElements, d, numSignals):
     eigenValues, eigenVectors = np.linalg.eig(R)
 
     indexesOfSortedEigenValues = np.argsort(np.abs(eigenValues))
@@ -23,12 +24,6 @@ def scan(thetaScan, numSignals, R, numElements, d):
         metric = 10 * np.log10(metric) # convert to dB
         results.append(metric)
 
-    results /= np.max(results)
+    results -= np.max(results)
 
     return results
-
-def doa(results, thetaScan):
-    peaks, _ = find_peaks(results, height=0)
-    doas = thetaScan[peaks]
-
-    return doas, peaks
