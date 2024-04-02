@@ -2,7 +2,6 @@ import adi
 import importlib
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
 from scipy import signal
 
 import plots
@@ -13,12 +12,13 @@ importlib.reload(plots)
 importlib.reload(music)
 importlib.reload(mvdr)
 
-
 # Connect to FMCOMMS5
 sdr = adi.FMComms5(uri="ip:analog")
 
 sdr.sample_rate = 1e6
 fs = int(sdr.sample_rate)
+
+sdr.rx_buffer_size = 10000 # 1024 is default
 
 # Receiver settings
 sdr.rx_lo = 5800000000
@@ -36,31 +36,9 @@ sdr.dds_single_tone(30000, 0.9, 1)
 
 # Get receiver data
 rx_data = sdr.rx() # must be called for new data
-# f, Pxx_den = signal.periodogram(x[0], fs)
 
-
-print("RX LO %s" % (sdr.rx_lo))
-
-print(rx_data[0].shape)
-
-f0, psd0 = signal.periodogram(rx_data[0], fs)
-f1, psd1 = signal.periodogram(rx_data[1], fs)
-
-plt.semilogy(f0, psd0)
-plt.semilogy(f1, psd1)
-plt.title("Test Plot")
-plt.ylim([1e-7, 1e4])
-plt.xlabel("frequency [Hz]")
-plt.ylabel("PSD [V**2/Hz]")
-plt.draw()
-plt.plot()
-
-peaks0, _ = signal.find_peaks(psd0, height=1e1)
-peaks1, _ = signal.find_peaks(psd1, height=1e1)
-print(peaks0)
-print(f0[peaks0])
-print(peaks1)
-print(f1[peaks1])
+###################################################################
+# Run MUSIC Algorithm
 
 guessNumSignals = 1
 numElements = 2
@@ -75,9 +53,11 @@ print(rx.shape)
 R = rx @ rx.conj().T 
 Rinv = np.linalg.pinv(R) 
 
+print(R.shape)
+
 thetaScan = np.linspace(-0.5 * np.pi, 0.5 * np.pi, precision)
 
-results = music.scan(thetaScan, guessNumSignals, R, numElements, d)
+results = music.scan(thetaScan, R, numElements, d, guessNumSignals)
 
 peaks, _ = signal.find_peaks(results, height=-2)
 doas = thetaScan[peaks]

@@ -2,17 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # create directions of arrival
-tx_doa = np.array([45, 0]) # in degrees
+tx_doa = np.array([30, -15]) # in degrees
 
 # create antenna array properties
 d = 0.5 # array spacing in terms of wavelength
 numElements = 10
-sigma = 0.5
+sigma = 1
 
 theta = tx_doa * np.pi / 180 # in radians
 
 sample_rate = 1e6
-samples = 1024
+samples = 10000
 t = np.arange(samples) / sample_rate
 t = t.reshape(1,-1) # turn into row vector
 
@@ -20,19 +20,12 @@ f_base = 0.03e6
 f_tone = np.array([])
 
 for i in range(len(tx_doa)):
-    arr = np.array([f_base + i * 100])
+    arr = np.array([f_base + i * 1000])
     f_tone = np.append(f_tone, arr)
 
 f_tone = f_tone.reshape(-1, 1) # turn into column vector
 
 tx = np.exp(2j * np.pi * f_tone * t)
-# print(np.var(tx[:, 0]))
-# tx = np.array([np.exp(2j * np.pi * f_base * t), np.exp(2j * np.pi * f_base * t2)]).squeeze()
-
-# print(tx.shape)
-# print(tx2.shape)
-
-
 
 # Steering vector matrix
 k = np.arange(numElements).reshape(-1, 1)

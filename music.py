@@ -1,6 +1,4 @@
 import numpy as np
-from scipy import signal
-import matplotlib.pyplot as plt
 
 # Perform MUSIC algorithm and output an array of angles
 def scan(thetaScan, R, numElements, d, numSignals):
@@ -19,9 +17,11 @@ def scan(thetaScan, R, numElements, d, numSignals):
     for theta_i in thetaScan:
         a = np.exp(-2j * np.pi * d * np.arange(numElements) * np.sin(theta_i)) # array factor
         a = a.reshape(-1,1)
+
         metric = 1 / (a.conj().T @ noiseMatrix @ noiseMatrix.conj().T @ a) # The main MUSIC equation
         metric = np.abs(metric.squeeze()) # take magnitude
         metric = 10 * np.log10(metric) # convert to dB
+        
         results.append(metric)
 
     results -= np.max(results)
