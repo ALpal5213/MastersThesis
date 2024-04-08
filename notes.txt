@@ -1,0 +1,4 @@
+scp ./doa_bf.py analog@169.254.92.202:/home/analog/Desktop/code/doa_bf.py
+
+
+ssh analog@169.254.92.202 "cd /home/analog/Desktop/code; python3 doa_bf.py --freq=5.8"
