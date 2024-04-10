@@ -82,13 +82,6 @@ print(R.shape)
 
 thetaScan = np.linspace(-0.5 * np.pi, 0.5 * np.pi, precision)
 
-results = music.scan(thetaScan, R, numElements, d, guessNumSignals)
-
-peaks, _ = signal.find_peaks(results, height=-2)
-doas = thetaScan[peaks]
-
-plots.plot_polar(thetaScan, results, peaks=peaks, title="MuSiC")
-plots.plot_regular(thetaScan, results, peaks=peaks, title="MuSiC")
 
 print("DoA:", doas * 180 / np.pi)
 
