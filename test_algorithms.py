@@ -6,6 +6,7 @@ import signal_simulation
 import music
 import mvdr
 import plots
+import time
 
 importlib.reload(signal_simulation)
 importlib.reload(music)
@@ -26,6 +27,8 @@ noise = signal_simulation.noise
 
 precision = 180 * 10**decimalPrecision + 1
 
+t0 = time.time()
+
 R = rx @ rx.conj().T 
 Rinv = np.linalg.pinv(R) 
 
@@ -40,6 +43,8 @@ doas = thetaScan[peaks]
 
 weights = mvdr.calc_weights(doas, Rinv, numElements, d)
 
+t1 = time.time()
+
 #################################################################
 
 plots.plot_polar(thetaScan, results, peaks=peaks, title="MuSiC Scan")
@@ -48,3 +53,5 @@ plots.plot_regular(thetaScan, results, peaks=peaks, title="MuSiC Scan")
 print("DoA (degrees):", doas * 180 / np.pi)
 
 print(weights)
+
+print(t1 - t0)

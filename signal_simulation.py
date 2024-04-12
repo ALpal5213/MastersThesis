@@ -6,7 +6,7 @@ tx_doa = np.array([30, -15]) # in degrees
 
 # create antenna array properties
 d = 0.5 # array spacing in terms of wavelength
-numElements = 10
+numElements = 4
 sigma = 1
 
 theta = tx_doa * np.pi / 180 # in radians

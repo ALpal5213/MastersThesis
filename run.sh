@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SCRIPT_NAME="doa_bf.py"
 
@@ -11,8 +11,9 @@ stop() {
 
 start() {
   printf "Starting $SCRIPT_NAME: "
-  cd /home/analog/Desktop/code
-  nohup python3 $SCRIPT_NAME > startup_error.log &
+  nohup python3 $SCRIPT_NAME > run_error.log &
+  sleep 1
+  mv run_error.log ./logs/run_error.log
   touch /var/lock/$SCRIPT_NAME
   echo "OK"
 }
