@@ -1,10 +1,12 @@
 
 # Import libraries
 import adi
+import sys
 import importlib
 import argparse
 import configparser
 import time
+import datetime
 import json
 import numpy as np
 from scipy import signal
@@ -24,9 +26,7 @@ def doaAndBeamforming():
     d = float(config['Parameters']['elementSpacing'])
     carrierFreq = float(config['Parameters']['carrierFreq'])
     samples = int(config['Parameters']['samples'])
-    sampleRate = float(config['Parameters']['sampleRate'])
-
-    run = eval(config['Script']['run'])
+    sampleRate = int(config['Parameters']['sampleRate'])
     updateInterval = float(config['Script']['updateInterval'])
     
     # Connect to device
@@ -51,48 +51,50 @@ def doaAndBeamforming():
         "thetaScan": thetaScan.tolist()
     }
 
-    
+    # Get receiver data
+    rx_data = sdr.rx() # must be called for new data
+    rx_data = np.array(rx_data[0:numElements])
 
-    while(run == True):
-        # Get receiver data
-        rx_data = sdr.rx() # must be called for new data
-        rx_data = np.array(rx_data[0:numElements])
+    R = rx_data @ rx_data.conj().T 
+    Rinv = np.linalg.pinv(R)
 
-        R = rx_data @ rx_data.conj().T 
-        # Rinv = np.linalg.pinv(R)
+    weights = mvdr.calc_weights(0, Rinv, numElements, d)
 
-        spectrum = music.scan(thetaScan, R, numElements, d, numSignals)
+    while(True):
+        try:
+            # Get receiver data
+            rx_data = sdr.rx() # must be called for new data
+            rx_data = np.array(rx_data[0:numElements])
 
-        peaks, _ = signal.find_peaks(spectrum, prominence=1)
-        doas = thetaScan[peaks]
+            R = rx_data @ rx_data.conj().T 
+            Rinv = np.linalg.pinv(R)
 
-        # Add updated data to dictionary
-        dict["spectrum"] = spectrum.tolist()
-        dict["doas"] = doas.tolist()
+            spectrum = music.scan(thetaScan, R, numElements, d, numSignals)
 
-        dict_json = json.dumps(dict)
+            peaks, _ = signal.find_peaks(spectrum, prominence=1)
+            doas = thetaScan[peaks]
 
-        jsonFile = open("./dict.json", "w") # open and write over file
-        jsonFile.write(dict_json)  
-        jsonFile.close()
+            weights = mvdr.calc_weights(doas, Rinv, numElements, d)
 
-        logFile = open("./logs/log.txt", "a")
-        logFile.write("DoA: " + str(doas * 180 / np.pi) + "\n")
-        logFile.close()
+            # Add updated data to dictionary
+            dict["spectrum"] = spectrum.tolist()
+            dict["doas"] = doas.tolist()
+            dict["weights"] = weights.tolist()
 
-        config.read('config.ini')
+            dict_json = json.dumps(dict)
 
-        numElements = int(config['Parameters']['numElements'])
-        numSignals = int(config['Parameters']['numSignals'])
-        d = float(config['Parameters']['elementSpacing'])
-        carrierFreq = float(config['Parameters']['carrierFreq'])
-        samples = int(config['Parameters']['samples'])
-        sampleRate = float(config['Parameters']['sampleRate'])
-
-        run = eval(config['Script']['run'])
-        updateInterval = float(config['Script']['updateInterval'])
+            jsonFile = open("./dict.json", "w") # open and write over file
+            jsonFile.write(dict_json)  
+            jsonFile.close()
+        except Exception as e:
+            _, _, exc_tb = sys.exc_info()
+            logFile =  open("./logs/script_error.log", "a")
+            logFile.write("ERROR: Loop Block\n")
+            output = str(datetime.datetime.now()) + f" - Error on line {exc_tb.tb_lineno}: \"" + str(e) + "\"\n"
+            logFile.write(output)
+            logFile.close()
         
-        time.sleep(updateInterval) # wait 1 seconds
+        time.sleep(updateInterval)
 
 if __name__ == "__main__":
     doaAndBeamforming()    

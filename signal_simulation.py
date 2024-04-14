@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # create directions of arrival
-tx_doa = np.array([30, -15]) # in degrees
+tx_doa = np.array([20, 45]) # in degrees
 
 # create antenna array properties
 d = 0.5 # array spacing in terms of wavelength
@@ -20,7 +20,7 @@ f_base = 0.03e6
 f_tone = np.array([])
 
 for i in range(len(tx_doa)):
-    arr = np.array([f_base + i * 1000])
+    arr = np.array([f_base + i * 10000])
     f_tone = np.append(f_tone, arr)
 
 f_tone = f_tone.reshape(-1, 1) # turn into column vector
@@ -44,9 +44,9 @@ print(np.var(noise))
 rx = rx + noise
 # print(rx.shape)
 
-for i in range(numElements):
-    plt.plot(np.asarray(rx[i,:]).squeeze().real[0:200])
-plt.xlabel("Time")
-plt.ylabel("Amplitude")
-plt.grid()
-plt.show()
+# for i in range(numElements):
+#     plt.plot(np.asarray(rx[i,:]).squeeze().real[0:200])
+# plt.xlabel("Time")
+# plt.ylabel("Amplitude")
+# plt.grid()
+# plt.show()

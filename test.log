@@ -1,0 +1,12 @@
+ERROR: Initialization Block
+2024-04-13 15:03:14.024396 - Error on line {exc_tb.tb_lineno}: name 'x' is not defined
+ERROR: Initialization Block
+2024-04-13 15:04:01.874314 - Error on line 5: name 'x' is not defined
+ERROR: Initialization Block
+2024-04-13 15:04:24.245053 - Error on line 5: "name 'x' is not defined"
+ERROR: Initialization Block
+2024-04-13 15:04:24.856770 - Error on line 5: "name 'x' is not defined"
+ERROR: Initialization Block
+2024-04-13 15:04:25.166017 - Error on line 5: "name 'x' is not defined"
+ERROR: Initialization Block
+2024-04-13 15:04:25.421478 - Error on line 5: "name 'x' is not defined"

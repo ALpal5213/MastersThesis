@@ -42,18 +42,23 @@ ax.set_theta_direction(-1) # increase clockwise
 ax.set_rlabel_position(55)  # Move grid labels away from other labels
 
 for i in range(1000):
-    data_json = sftp.open(remote_file_path).read()
+    try:
+        data_json = sftp.open(remote_file_path).read()
 
-    data = json.loads(data_json)
-    spectrum = data["spectrum"]
+        data = json.loads(data_json)
+        spectrum = np.array(data["spectrum"])
 
-    # line1.set_xdata(thetaScan)
-    line1.set_ydata(spectrum)
-    fig.canvas.draw()
+        # line1.set_xdata(thetaScan)
+        ax.set_ylim([np.min(spectrum), np.max(spectrum)])
+        line1.set_ydata(spectrum)
+        fig.canvas.draw()
 
-    fig.canvas.flush_events()
+        fig.canvas.flush_events()
 
-    print(i)
+        print("iteration:", i, "DoAs:", np.array(data["doas"]) * 180 / np.pi)
+    except Exception as e:
+        print(str(e))
+        print("ignoring")
     time.sleep(0.1)
 
 sftp.close()
