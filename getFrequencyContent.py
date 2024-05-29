@@ -1,18 +1,21 @@
 import numpy as np
-from scipy import fftpack
+from scipy import fftpack, signal
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
 
 
-def getFrequencyContent(signal, samples, sampleRate):
-    samplePeriod = 1 / sampleRate
+def getFrequencyContent(signalData, sampleRate, plot=False):
+    f, Pxx_den = signal.periodogram(signalData, sampleRate)
+    freq = f[np.argmax(Pxx_den)]
 
-    freq = fftpack.fft(signal)
-    xf = np.linspace(0, 1 / (2 * samplePeriod), samples // 2)
+    if plot == True:
+        fig, ax = plt.subplots(2)
 
-    fig, ax = plt.subplots(2)
-    ax[0].plot(signal)
-    ax[1].plot(xf, 2 / samples * np.abs(freq[:samples // 2]))
+        ax[0].plot(signalData)
+        ax[1].plot(f, Pxx_den)
+        
+        plt.show(block=False)
 
-    plt.show(block=False)
+    return freq
+

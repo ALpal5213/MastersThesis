@@ -4,70 +4,86 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
 import importlib
-import signal_simulation
+import signalSim
 import music
 import mvdr
 import plots
 import time
 import getFrequencyContent
+import calibration
 
-importlib.reload(signal_simulation)
+importlib.reload(signalSim)
 importlib.reload(music)
 importlib.reload(mvdr)
 importlib.reload(plots)
 importlib.reload(getFrequencyContent)
+importlib.reload(calibration)
+
 
 #################################################################
 
 guessNumSignals = 2
 decimalPrecision = 0 # can't go very high
 
-numElements = signal_simulation.numElements
-d = signal_simulation.d
-rx = signal_simulation.rx
-samples = signal_simulation.samples
-sampleRate = signal_simulation.sample_rate
-sigma = signal_simulation.sigma
-noise = signal_simulation.noise
-
 precision = 180 * 10**decimalPrecision + 1
 
 t0 = time.time()
 
-R = rx @ rx.conj().T 
+doas = np.array([0, 45]) * np.pi / 180
+f_b = np.array([79872, 500000])
+samples = 10000
+sampleRate = 30720000
+d = 0.5
+numElements = 4
+sigma = 0.5#1 / np.sqrt(2)
+
+
+s = signalSim.generateSignals(f_b, samples, sampleRate)
+A = signalSim.generateSteeringMatrix(doas, d, numElements)
+
+# np.random.seed(4321) # ensure same noise each time
+noise = np.random.normal(0, sigma, size=[numElements, samples]) + \
+    1j * np.random.normal(0, sigma, size=[numElements, samples])
+
+y = 600 * ((A @ s) + noise)
+
+signalSim.plotSignal(y, samples, sampleRate, numElements)
+
+R = (y @ y.conj().T) / samples
 Rinv = np.linalg.pinv(R) 
 
 thetaScan = np.linspace(-0.5 * np.pi, 0.5 * np.pi, precision) # -90 to +90 degrees
 
 #################################################################
 
-results = music.scan(thetaScan, R, numElements, d, guessNumSignals)
+spectrum = music.scan(thetaScan, R, numElements, d, guessNumSignals)
+print(spectrum.shape)
 
-peaks, _ = signal.find_peaks(results, prominence=1) # Need to modify
+peaks, _ = signal.find_peaks(spectrum, height=5) # Need to modify
 doas = thetaScan[peaks]
-print("DoA (degrees):", doas * 180 / np.pi)
-weights = mvdr.calc_weights(doas, Rinv, numElements, d)
 
-t1 = time.time()
+print("DoA (degrees):", doas * 180 / np.pi)
+plots.plot_polar(thetaScan, spectrum, peaks=peaks, title="MuSiC Scan")
+
+print(doas)
+weights = mvdr.calc_weights(doas[0], Rinv, numElements, d)
+print(weights)
 
 #################################################################
 # Apply weights for Receiving
-
-print(rx.shape)
-print(weights.shape)
-print(weights[:,0].reshape(-1, 1).shape)
-
-weights_ones = np.array([1, 1, 1, 1]).reshape(-1, 1)
-rx_new = weights_ones.conj().T @ rx
+weights_ones = np.array([0.25, 0.25, 0.25, 0.25]).reshape(-1, 1)
+rx_new = weights_ones.conj().T @ y
 rx_new = rx_new.flatten()
-print(weights_ones.shape)
 
-rx_summedAndWeighted = weights[:,0].conj().T @ rx
+
+weightst = np.exp(-2j * np.pi * d * np.arange(numElements) * np.sin(doas[0]))
+rx_summedAndWeighted = weights.conj().T @ y
 rx_summedAndWeighted = rx_summedAndWeighted.flatten()
 
 #################################################################
 
-getFrequencyContent.getFrequencyContent(rx_new[0:500], 500, sampleRate)
-getFrequencyContent.getFrequencyContent(rx_summedAndWeighted[0:500], 500, sampleRate)
+getFrequencyContent.getFrequencyContent(y[0], sampleRate, plot=True)
+freq = getFrequencyContent.getFrequencyContent(rx_summedAndWeighted, sampleRate, plot=True)
+print(freq)
 
-plt.pause(100)
+plt.pause(30)

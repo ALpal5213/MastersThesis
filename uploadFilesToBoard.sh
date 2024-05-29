@@ -13,6 +13,7 @@ sshpass -p $USER_PASSWORD scp ./music.py $USER_NAME@$BOARD_IP:$FILE_DIR/music.py
 sshpass -p $USER_PASSWORD scp ./mvdr.py $USER_NAME@$BOARD_IP:$FILE_DIR/mvdr.py
 sshpass -p $USER_PASSWORD scp ./run.sh $USER_NAME@$BOARD_IP:$FILE_DIR/run.sh
 sshpass -p $USER_PASSWORD scp ./config.ini $USER_NAME@$BOARD_IP:$FILE_DIR/config.ini
+sshpass -p $USER_PASSWORD scp ./calibration.py $USER_NAME@$BOARD_IP:$FILE_DIR/calibration.py
 
 sshpass -p $USER_PASSWORD ssh $USER_NAME@$BOARD_IP "cd $FILE_DIR; chmod +x ./run.sh"
 sshpass -p $ROOT_PASSWORD ssh root@$BOARD_IP "cd $FILE_DIR; chmod +x ./run.sh"
