@@ -29,8 +29,8 @@ precision = 180 * 10**decimalPrecision + 1
 
 t0 = time.time()
 
-doas = np.array([0, 45]) * np.pi / 180
-f_b = np.array([79872, 500000])
+doas = np.array([0, 15]) * np.pi / 180
+f_b = np.array([40000, 50000])
 samples = 10000
 sampleRate = 30720000
 d = 0.5
@@ -45,9 +45,9 @@ A = signalSim.generateSteeringMatrix(doas, d, numElements)
 noise = np.random.normal(0, sigma, size=[numElements, samples]) + \
     1j * np.random.normal(0, sigma, size=[numElements, samples])
 
-y = 600 * ((A @ s) + noise)
+y = 1 * ((A @ s))
 
-signalSim.plotSignal(y, samples, sampleRate, numElements)
+# signalSim.plotSignal(y, samples, sampleRate, numElements)
 
 R = (y @ y.conj().T) / samples
 Rinv = np.linalg.pinv(R) 
@@ -57,7 +57,7 @@ thetaScan = np.linspace(-0.5 * np.pi, 0.5 * np.pi, precision) # -90 to +90 degre
 #################################################################
 
 spectrum = music.scan(thetaScan, R, numElements, d, guessNumSignals)
-print(spectrum.shape)
+
 
 peaks, _ = signal.find_peaks(spectrum, height=5) # Need to modify
 doas = thetaScan[peaks]
@@ -65,9 +65,9 @@ doas = thetaScan[peaks]
 print("DoA (degrees):", doas * 180 / np.pi)
 plots.plot_polar(thetaScan, spectrum, peaks=peaks, title="MuSiC Scan")
 
-print(doas)
+# print(doas)
 weights = mvdr.calc_weights(doas[0], Rinv, numElements, d)
-print(weights)
+# print(weights)
 
 #################################################################
 # Apply weights for Receiving
@@ -82,8 +82,8 @@ rx_summedAndWeighted = rx_summedAndWeighted.flatten()
 
 #################################################################
 
-getFrequencyContent.getFrequencyContent(y[0], sampleRate, plot=True)
-freq = getFrequencyContent.getFrequencyContent(rx_summedAndWeighted, sampleRate, plot=True)
-print(freq)
+# getFrequencyContent.getFrequencyContent(y[0], sampleRate, plot=True)
+# freq = getFrequencyContent.getFrequencyContent(rx_summedAndWeighted, sampleRate, plot=True)
+# print(freq)
 
-plt.pause(30)
+plt.pause(20)

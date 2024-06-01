@@ -8,7 +8,7 @@ import time
 import datetime
 import json
 import numpy as np
-from scipy import signal, fftpack
+from scipy import signal
 
 import music
 import mvdr
